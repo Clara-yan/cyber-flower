@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>泪滴棱镜 · 悲伤之花</title>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Microsoft YaHei', sans-serif; }
+        .controls {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .controls-inner {
+            display: inline-block;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 50px;
+            pointer-events: auto;
+            border: 1px solid rgba(100,150,255,0.5);
+        }
+        input {
+            background: transparent;
+            border: none;
+            padding: 12px 20px;
+            width: 260px;
+            color: #aaccff;
+            font-size: 14px;
+            outline: none;
+        }
+        input::placeholder { color: rgba(170,204,255,0.5); }
+        button {
+            background: linear-gradient(135deg, #5a4a8a, #3a2a6a);
+            border: none;
+            padding: 10px 24px;
+            border-radius: 40px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        button:hover { transform: scale(1.02); background: linear-gradient(135deg, #6a5a9a, #4a3a7a); }
+        .meter {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: rgba(0,0,0,0.5);
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: #88aaff;
+            font-size: 12px;
+            font-family: monospace;
+            z-index: 100;
+        }
+        .title {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            color: rgba(200,200,255,0.7);
+            font-size: 12px;
+            letter-spacing: 3px;
+            z-index: 100;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="title">✦ 泪滴棱镜 · 悲伤之花 ✦</div>
+    <div class="controls">
+        <div class="controls-inner">
+            <input type="text" id="sadInput" placeholder="写下你的悲伤... 越悲伤裂纹越多" autocomplete="off">
+            <button id="bloomBtn">🌙 绽放</button>
+        </div>
+    </div>
+    <div class="meter" id="sadnessMeter">💧 悲伤指数: 0%</div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.128.0/build/three.module.js"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x050518);
+        scene.fog = new THREE.FogExp2(0x050518, 0.02);
+
+        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(2, 1.2, 3);
+        camera.lookAt(0, 0.5, 0);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.body.appendChild(renderer.domElement);
+
+        let autoRotate = true;
+        let angle = 0;
+
+        const ambient = new THREE.AmbientLight(0x22223b);
+        scene.add(ambient);
+
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+        mainLight.position.set(2, 3, 2);
+        mainLight.castShadow = true;
+        scene.add(mainLight);
+
+        const fillLight = new THREE.PointLight(0x8866ff, 0.4);
+        fillLight.position.set(-1, 1, 1.5);
+        scene.add(fillLight);
+
+        const backLight = new THREE.PointLight(0x44aaff, 0.3);
+        backLight.position.set(1, 1.2, -2);
+        scene.add(backLight);
+
+        // 星空
+        const starsGeo = new THREE.BufferGeometry();
+        const starsPos = [];
+        for (let i = 0; i < 600; i++) {
+            starsPos.push((Math.random() - 0.5) * 150);
+            starsPos.push((Math.random() - 0.5) * 80);
+            starsPos.push((Math.random() - 0.5) * 60 - 30);
+        }
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starsPos), 3));
+        const starsMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.04, transparent: true, opacity: 0.5 });
+        const stars = new THREE.Points(starsGeo, starsMat);
+        scene.add(stars);
+
+        // 地面
+        const gridHelper = new THREE.GridHelper(8, 20, 0x4466aa, 0x224466);
+        gridHelper.position.y = -0.6;
+        gridHelper.material.transparent = true;
+        gridHelper.material.opacity = 0.2;
+        scene.add(gridHelper);
+
+        let currentFlower = null;
+        let currentParticles = null;
+        let currentSadness = 0;
+        let isWithering = false;
+
+        // 悲伤值计算
+        function analyzeSadness(text) {
+            if (!text || text.trim() === "") return 0.25;
+            let score = 0.1;
+            const keywords = ['痛','泪','悲','伤','心碎','孤独','绝望','哭泣','遗忘','破碎','离开','失去','死','亡','冷','冰','sad','cry','pain','lost','alone'];
+            const lower = text.toLowerCase();
+            for (let kw of keywords) {
+                if (lower.includes(kw)) score += 0.1;
+            }
+            score += Math.min(0.4, text.length / 60);
+            return Math.min(0.95, score);
+        }
+
+        // 花瓣
+        function createPetal(angleIndex, total, crackLevel) {
+            const width = 0.52;
+            const height = 0.68;
+            const geometry = new THREE.PlaneGeometry(width, height, 24, 24);
+
+            const positions = geometry.attributes.position.array;
+            for (let i = 0; i < positions.length; i += 3) {
+                let x = positions[i];
+                let y = positions[i+1];
+                let z = positions[i+2];
+                let curve = Math.sin(y * Math.PI) * 0.12;
+                positions[i] = x + curve * Math.abs(x);
+                positions[i+2] = z + Math.cos(y * Math.PI) * 0.1;
+            }
+            geometry.computeVertexNormals();
+
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#2a1e44';
+            ctx.fillRect(0,0,512,512);
+
+            const grad = ctx.createLinearGradient(0,0,512,512);
+            grad.addColorStop(0, '#3a2a60');
+            grad.addColorStop(1, '#2a1a44');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0,0,512,512);
+
+            const crackCount = Math.floor(5 + crackLevel * 40);
+            ctx.strokeStyle = '#aaccff';
+            ctx.lineWidth = 3 + crackLevel * 10;
+            for (let i = 0; i < crackCount; i++) {
+                ctx.beginPath();
+                let x = Math.random() * 512;
+                let y = Math.random() * 512;
+                ctx.moveTo(x, y);
+                for (let j = 0; j < 5; j++) {
+                    x += (Math.random() - 0.5) * 60;
+                    y += (Math.random() - 0.5) * 60;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+            }
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.MeshStandardMaterial({
+                map: texture,
+                color: 0xd8bcff,
+                emissive: 0x332266,
+                emissiveIntensity: 0.2 + crackLevel * 0.6,
+                metalness: 0.82,
+                roughness: 0.28,
+                transparent: true,
+                opacity: 0.95,
+                side: THREE.DoubleSide
+            });
+
+            const petal = new THREE.Mesh(geometry, material);
+            const rad = 0.68;
+            const ang = (angleIndex / total) * Math.PI * 2;
+            petal.position.x = Math.cos(ang) * rad;
+            petal.position.z = Math.sin(ang) * rad;
+            petal.position.y = 0.18 + Math.sin(ang * 2) * 0.04;
+            petal.lookAt(0, 0.4, 0);
+            petal.rotateZ(ang * 0.5);
+            return petal;
+        }
+
+        // 花朵
+        function createFlower(sadnessLevel) {
+            const group = new THREE.Group();
+
+            const stamenMat = new THREE.MeshStandardMaterial({
+                color: 0x88aaff,
+                emissive: 0x4488cc,
+                emissiveIntensity: 0.7,
+                metalness: 0.4
+            });
+            const stamen = new THREE.Mesh(new THREE.SphereGeometry(0.2,32,32), stamenMat);
+            group.add(stamen);
+
+            for (let i = 0; i < 8; i++) {
+                group.add(createPetal(i,8,sadnessLevel));
+            }
+            for (let i = 0; i < 6; i++) {
+                const p = createPetal(i+0.5,6,sadnessLevel);
+                p.scale.set(0.82,0.82,0.82);
+                p.position.x *= 0.75;
+                p.position.z *= 0.75;
+                p.position.y -= 0.03;
+                group.add(p);
+            }
+
+            return group;
+        }
+
+        // 泪滴粒子
+        function createParticles(sadnessLevel) {
+            const count = 350 + Math.floor(sadnessLevel * 550);
+            const geo = new THREE.BufferGeometry();
+            const pos = [];
+            for (let i = 0; i < count; i++) {
+                const r = 0.9 + Math.random()*1.6;
+                const theta = Math.random()*Math.PI*2;
+                const phi = Math.acos(2*Math.random()-1);
+                pos.push(
+                    Math.sin(phi)*Math.cos(theta)*r,
+                    Math.sin(phi)*Math.sin(theta)*r + 0.4,
+                    Math.cos(phi)*r
+                );
+            }
+            geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos),3));
+            const mat = new THREE.PointsMaterial({
+                color:0x66aaff,
+                size:0.032,
+                transparent:true,
+                blending:THREE.AdditiveBlending
+            });
+            return new THREE.Points(geo,mat);
+        }
+
+        // 凋零
+        function witherAndRemove() {
+            if (isWithering) return;
+            if (!currentFlower && !currentParticles) return;
+            isWithering = true;
+
+            const st = performance.now();
+            const dur = 1200;
+
+            function step(now) {
+                const p = Math.min(1,(now-st)/dur);
+
+                if (currentFlower) {
+                    currentFlower.children.forEach(ch=>{
+                        if(ch.material){
+                            ch.material.opacity = Math.max(0,0.95*(1-p));
+                            ch.material.emissiveIntensity = Math.max(0,0.5*(1-p));
+                        }
+                    });
+                    currentFlower.position.y = p*0.2;
+                }
+                if(currentParticles){
+                    currentParticles.material.opacity = Math.max(0,1-p*1.2);
+                }
+
+                if(p<1) requestAnimationFrame(step);
+                else{
+                    if(currentFlower) scene.remove(currentFlower);
+                    if(currentParticles) scene.remove(currentParticles);
+                    currentFlower = null;
+                    currentParticles = null;
+                    isWithering = false;
+                }
+            }
+            requestAnimationFrame(step);
+        }
+
+        // 绽放
+        function bloom(text) {
+            if(isWithering) return;
+            const sad = analyzeSadness(text);
+            currentSadness = sad;
+            document.getElementById('sadnessMeter').innerHTML = `💧 悲伤指数: ${Math.floor(sad*100)}%`;
+
+            if(currentFlower){
+                witherAndRemove();
+                setTimeout(()=>{
+                    if(!isWithering && !currentFlower) createNew(sad);
+                },350);
+            }else{
+                createNew(sad);
+            }
+        }
+
+        function createNew(sad){
+            currentFlower = createFlower(sad);
+            currentParticles = createParticles(sad);
+            scene.add(currentFlower);
+            scene.add(currentParticles);
+
+            currentFlower.scale.set(0,0,0);
+            let g=0;
+            function grow(){
+                g+=0.06;
+                const s=Math.min(1,g);
+                if(currentFlower) currentFlower.scale.set(s,s,s);
+                if(s<1) requestAnimationFrame(grow);
+            }
+            requestAnimationFrame(grow);
+            autoRotate = true;
+        }
+
+        // 交互
+        document.getElementById('bloomBtn').onclick = ()=>{
+            const i = document.getElementById('sadInput');
+            bloom(i.value || "微光之哀");
+        };
+        document.getElementById('sadInput').onkeypress = e=>{
+            if(e.key==='Enter') bloom(e.target.value || "默然");
+        };
+
+        // 主循环
+        let time=0;
+        function anim(){
+            requestAnimationFrame(anim);
+            time+=0.016;
+
+            if(autoRotate && !isWithering){
+                angle+=0.008;
+                camera.position.x = 2.8*Math.sin(angle);
+                camera.position.z = 2.8*Math.cos(angle);
+                camera.lookAt(0,0.6,0);
+            }
+
+            if(currentParticles && !isWithering){
+                currentParticles.rotation.y = time*0.15;
+                currentParticles.rotation.x = Math.sin(time*0.4)*0.1;
+                const pulse = 0.028 + currentSadness*0.02 + Math.sin(time*6)*0.003;
+                currentParticles.material.size = pulse;
+            }
+
+            fillLight.intensity = 0.4 + Math.sin(time)*0.15;
+            backLight.intensity = 0.3 + Math.cos(time*0.8)*0.1;
+
+            renderer.render(scene,camera);
+        }
+        anim();
+
+        // 初始花
+        setTimeout(()=>bloom("寂静的思念如同破碎的水晶"),300);
+
+        // 响应窗口
+        window.onresize = ()=>{
+            camera.aspect = innerWidth/innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(innerWidth,innerHeight);
+        };
+    </script>
+</body>
+</html>
