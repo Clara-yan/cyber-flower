@@ -2,59 +2,83 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>泪滴棱镜 · 悲伤之花</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>泪滴棱镜 · 破碎琉璃之花</title>
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Microsoft YaHei', sans-serif; }
-        .controls {
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', 'Poppins', monospace;
+        }
+        .ui-container {
             position: fixed;
             bottom: 30px;
             left: 0;
             right: 0;
-            text-align: center;
+            display: flex;
+            justify-content: center;
             z-index: 100;
             pointer-events: none;
         }
-        .controls-inner {
-            display: inline-block;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            padding: 10px 20px;
+        .input-box {
+            background: rgba(10, 10, 25, 0.7);
+            backdrop-filter: blur(15px);
             border-radius: 50px;
+            padding: 8px 20px;
+            display: flex;
+            gap: 12px;
+            border: 1px solid rgba(100, 150, 255, 0.5);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(100, 150, 255, 0.3);
             pointer-events: auto;
-            border: 1px solid rgba(100,150,255,0.5);
         }
-        input {
+        .sad-input {
             background: transparent;
             border: none;
-            padding: 12px 20px;
-            width: 260px;
-            color: #aaccff;
-            font-size: 14px;
+            padding: 14px 20px;
+            width: 280px;
+            color: #eef;
+            font-size: 15px;
             outline: none;
+            font-family: monospace;
         }
-        input::placeholder { color: rgba(170,204,255,0.5); }
-        button {
-            background: linear-gradient(135deg, #5a4a8a, #3a2a6a);
+        .sad-input::placeholder {
+            color: rgba(170, 200, 255, 0.6);
+            font-size: 13px;
+        }
+        .bloom-btn {
+            background: linear-gradient(135deg, #5a4a9a, #3a2a7a);
             border: none;
-            padding: 10px 24px;
             border-radius: 40px;
+            padding: 0 28px;
             color: white;
-            cursor: pointer;
             font-weight: bold;
-            transition: 0.3s;
+            cursor: pointer;
+            transition: all 0.3s;
+            letter-spacing: 2px;
+            font-size: 14px;
+            box-shadow: 0 0 15px rgba(100, 80, 200, 0.5);
+            font-family: monospace;
         }
-        button:hover { transform: scale(1.02); background: linear-gradient(135deg, #6a5a9a, #4a3a7a); }
+        .bloom-btn:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 25px rgba(120, 100, 255, 0.8);
+            background: linear-gradient(135deg, #6a5aaa, #4a3a8a);
+        }
         .meter {
             position: fixed;
-            bottom: 100px;
+            bottom: 120px;
             right: 20px;
-            background: rgba(0,0,0,0.5);
-            padding: 6px 14px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 8px 18px;
             border-radius: 20px;
-            color: #88aaff;
             font-size: 12px;
+            color: #88ccff;
             font-family: monospace;
+            pointer-events: none;
             z-index: 100;
+            border-right: 2px solid #88aaff;
+            letter-spacing: 1px;
         }
         .title {
             position: fixed;
@@ -62,23 +86,40 @@
             left: 0;
             right: 0;
             text-align: center;
-            color: rgba(200,200,255,0.7);
+            color: rgba(220, 220, 255, 0.9);
             font-size: 12px;
-            letter-spacing: 3px;
-            z-index: 100;
+            letter-spacing: 4px;
+            font-weight: 300;
+            text-shadow: 0 0 10px rgba(100, 100, 255, 0.8);
             pointer-events: none;
+            z-index: 100;
+            font-family: monospace;
+        }
+        .subtitle {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            font-size: 10px;
+            color: rgba(150, 180, 255, 0.4);
+            font-family: monospace;
+            pointer-events: none;
+        }
+        @media (max-width: 600px) {
+            .sad-input { width: 180px; font-size: 13px; }
+            .bloom-btn { padding: 0 18px; font-size: 12px; }
         }
     </style>
 </head>
 <body>
-    <div class="title">✦ 泪滴棱镜 · 悲伤之花 ✦</div>
-    <div class="controls">
-        <div class="controls-inner">
-            <input type="text" id="sadInput" placeholder="写下你的悲伤... 越悲伤裂纹越多" autocomplete="off">
-            <button id="bloomBtn">🌙 绽放</button>
+    <div class="title">✦ 泪滴棱镜 · 破碎琉璃 ✦</div>
+    <div class="ui-container">
+        <div class="input-box">
+            <input type="text" class="sad-input" id="sadInput" placeholder="写下你的悲伤... 越悲伤，裂纹越深" autocomplete="off">
+            <button class="bloom-btn" id="bloomBtn">💧 绽放</button>
         </div>
     </div>
-    <div class="meter" id="sadnessMeter">💧 悲伤指数: 0%</div>
+    <div class="meter" id="sadnessMeter">💔 悲伤指数: 0%</div>
+    <div class="subtitle">「将无形的悲伤，化为可触摸的赛博晶体」</div>
 
     <script type="importmap">
         {
@@ -91,316 +132,416 @@
     <script type="module">
         import * as THREE from 'three';
 
+        // --- 初始化场景 ---
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x050518);
-        scene.fog = new THREE.FogExp2(0x050518, 0.02);
+        scene.background = new THREE.Color(0x030318);
+        scene.fog = new THREE.FogExp2(0x030318, 0.012);
 
-        const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.set(2, 1.2, 3);
-        camera.lookAt(0, 0.5, 0);
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(2.2, 1.4, 3.2);
+        camera.lookAt(0, 0.6, 0);
 
-        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
         renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
         renderer.shadowMap.enabled = true;
         document.body.appendChild(renderer.domElement);
 
-        let autoRotate = true;
-        let angle = 0;
-
-        const ambient = new THREE.AmbientLight(0x22223b);
-        scene.add(ambient);
-
-        const mainLight = new THREE.DirectionalLight(0xffffff, 1);
+        // --- 赛博灯光系统 ---
+        const ambientLight = new THREE.AmbientLight(0x1a1a3a, 0.5);
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
         mainLight.position.set(2, 3, 2);
         mainLight.castShadow = true;
         scene.add(mainLight);
-
-        const fillLight = new THREE.PointLight(0x8866ff, 0.4);
-        fillLight.position.set(-1, 1, 1.5);
-        scene.add(fillLight);
-
-        const backLight = new THREE.PointLight(0x44aaff, 0.3);
-        backLight.position.set(1, 1.2, -2);
+        
+        const backLight = new THREE.PointLight(0x6688ff, 0.8);
+        backLight.position.set(-1.2, 1.8, -2);
         scene.add(backLight);
-
-        // 星空
-        const starsGeo = new THREE.BufferGeometry();
-        const starsPos = [];
-        for (let i = 0; i < 600; i++) {
-            starsPos.push((Math.random() - 0.5) * 150);
-            starsPos.push((Math.random() - 0.5) * 80);
-            starsPos.push((Math.random() - 0.5) * 60 - 30);
+        
+        const fillLight = new THREE.PointLight(0xff88cc, 0.5);
+        fillLight.position.set(1.5, 1.2, 1.8);
+        scene.add(fillLight);
+        
+        const rimLight = new THREE.PointLight(0x44aaff, 0.6);
+        rimLight.position.set(0.5, 1.5, -2.5);
+        scene.add(rimLight);
+        
+        // 动态彩色光源
+        const colorLight = new THREE.PointLight(0xaa66ff, 0.4);
+        colorLight.position.set(1, 1, 1.5);
+        scene.add(colorLight);
+        
+        // --- 星空粒子背景 ---
+        const starField = new THREE.BufferGeometry();
+        const starPositions = [];
+        for (let i = 0; i < 1200; i++) {
+            starPositions.push((Math.random() - 0.5) * 200);
+            starPositions.push((Math.random() - 0.5) * 100);
+            starPositions.push((Math.random() - 0.5) * 80 - 40);
         }
-        starsGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starsPos), 3));
-        const starsMat = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.04, transparent: true, opacity: 0.5 });
-        const stars = new THREE.Points(starsGeo, starsMat);
+        starField.setAttribute('position', new THREE.BufferAttribute(new Float32Array(starPositions), 3));
+        const starMaterial = new THREE.PointsMaterial({ color: 0x88aaff, size: 0.035, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+        const stars = new THREE.Points(starField, starMaterial);
         scene.add(stars);
-
-        // 地面
-        const gridHelper = new THREE.GridHelper(8, 20, 0x4466aa, 0x224466);
-        gridHelper.position.y = -0.6;
+        
+        // 地面微光网格
+        const gridHelper = new THREE.GridHelper(10, 30, 0x4488ff, 0x3355aa);
+        gridHelper.position.y = -0.7;
         gridHelper.material.transparent = true;
-        gridHelper.material.opacity = 0.2;
+        gridHelper.material.opacity = 0.15;
         scene.add(gridHelper);
-
+        
+        // --- 核心变量 ---
         let currentFlower = null;
         let currentParticles = null;
         let currentSadness = 0;
         let isWithering = false;
-
-        // 悲伤值计算
+        let autoRotateAngle = 0;
+        let autoRotate = true;
+        
+        // 悲伤分析器
         function analyzeSadness(text) {
             if (!text || text.trim() === "") return 0.25;
             let score = 0.1;
-            const keywords = ['痛','泪','悲','伤','心碎','孤独','绝望','哭泣','遗忘','破碎','离开','失去','死','亡','冷','冰','sad','cry','pain','lost','alone'];
-            const lower = text.toLowerCase();
+            const keywords = ['痛', '泪', '悲', '伤', '心碎', '孤独', '绝望', '黑暗', '哭泣', '遗忘', '破碎', '离开', '失去', '死', '亡', '冷', '冰', 'sad', 'cry', 'pain', 'lost', 'alone', 'break', 'tear'];
+            const lowerText = text.toLowerCase();
             for (let kw of keywords) {
-                if (lower.includes(kw)) score += 0.1;
+                if (lowerText.includes(kw.toLowerCase())) score += 0.1;
             }
-            score += Math.min(0.4, text.length / 60);
-            return Math.min(0.95, score);
+            score += Math.min(0.4, text.length / 55);
+            const exclaim = (text.match(/[!！?？]/g) || []).length;
+            score += exclaim * 0.03;
+            return Math.min(0.96, Math.max(0.18, score));
         }
-
-        // 花瓣
-        function createPetal(angleIndex, total, crackLevel) {
-            const width = 0.52;
-            const height = 0.68;
-            const geometry = new THREE.PlaneGeometry(width, height, 24, 24);
-
+        
+        // 生成裂纹纹理 (玻璃破碎感)
+        function createCrackTexture(crackIntensity) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 1024;
+            canvas.height = 1024;
+            const ctx = canvas.getContext('2d');
+            
+            // 透明底色 + 玻璃质感渐变
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            grad.addColorStop(0, 'rgba(80, 70, 130, 0.3)');
+            grad.addColorStop(0.5, 'rgba(120, 100, 170, 0.5)');
+            grad.addColorStop(1, 'rgba(60, 50, 110, 0.3)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // 裂纹: 随悲伤指数增加
+            const crackCount = Math.floor(10 + crackIntensity * 45);
+            ctx.strokeStyle = `rgba(200, 220, 255, ${0.6 + crackIntensity * 0.4})`;
+            ctx.lineWidth = 3 + crackIntensity * 12;
+            
+            for (let i = 0; i < crackCount; i++) {
+                ctx.beginPath();
+                let x = Math.random() * canvas.width;
+                let y = Math.random() * canvas.height;
+                ctx.moveTo(x, y);
+                const segments = 4 + Math.floor(Math.random() * 8);
+                for (let s = 0; s < segments; s++) {
+                    x += (Math.random() - 0.5) * 80;
+                    y += (Math.random() - 0.5) * 80;
+                    ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+                
+                // 分支裂纹
+                if (crackIntensity > 0.4 && Math.random() > 0.6) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + (Math.random() - 0.5) * 50, y + (Math.random() - 0.5) * 50);
+                    ctx.stroke();
+                }
+            }
+            
+            // 白色冷光边缘 (裂纹处发光)
+            ctx.strokeStyle = `rgba(180, 220, 255, ${0.8})`;
+            ctx.lineWidth = 2;
+            for (let i = 0; i < crackCount / 2; i++) {
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.lineTo(Math.random() * canvas.width, Math.random() * canvas.height);
+                ctx.stroke();
+            }
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            texture.wrapS = THREE.RepeatWrapping;
+            texture.wrapT = THREE.RepeatWrapping;
+            return texture;
+        }
+        
+        // 创建单瓣 (玻璃破碎质感)
+        function createPetal(angle, radius, yOffset, crackLevel) {
+            const width = 0.58;
+            const height = 0.72;
+            const geometry = new THREE.PlaneGeometry(width, height, 48, 48);
+            
+            // 顶点弯曲
             const positions = geometry.attributes.position.array;
             for (let i = 0; i < positions.length; i += 3) {
                 let x = positions[i];
                 let y = positions[i+1];
                 let z = positions[i+2];
-                let curve = Math.sin(y * Math.PI) * 0.12;
-                positions[i] = x + curve * Math.abs(x);
-                positions[i+2] = z + Math.cos(y * Math.PI) * 0.1;
+                let bend = Math.sin(y * Math.PI) * 0.14;
+                positions[i] = x + bend * Math.abs(x) * 0.8;
+                positions[i+2] = z + Math.cos(y * Math.PI) * 0.12 * Math.abs(x);
             }
             geometry.computeVertexNormals();
-
-            const canvas = document.createElement('canvas');
-            canvas.width = 512;
-            canvas.height = 512;
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#2a1e44';
-            ctx.fillRect(0,0,512,512);
-
-            const grad = ctx.createLinearGradient(0,0,512,512);
-            grad.addColorStop(0, '#3a2a60');
-            grad.addColorStop(1, '#2a1a44');
-            ctx.fillStyle = grad;
-            ctx.fillRect(0,0,512,512);
-
-            const crackCount = Math.floor(5 + crackLevel * 40);
-            ctx.strokeStyle = '#aaccff';
-            ctx.lineWidth = 3 + crackLevel * 10;
-            for (let i = 0; i < crackCount; i++) {
-                ctx.beginPath();
-                let x = Math.random() * 512;
-                let y = Math.random() * 512;
-                ctx.moveTo(x, y);
-                for (let j = 0; j < 5; j++) {
-                    x += (Math.random() - 0.5) * 60;
-                    y += (Math.random() - 0.5) * 60;
-                    ctx.lineTo(x, y);
-                }
-                ctx.stroke();
-            }
-
-            const texture = new THREE.CanvasTexture(canvas);
+            
+            const crackTexture = createCrackTexture(crackLevel);
+            
+            // 玻璃材质 - 高透明、高反射
             const material = new THREE.MeshStandardMaterial({
-                map: texture,
-                color: 0xd8bcff,
+                map: crackTexture,
+                color: 0xc0a8ff,
                 emissive: 0x332266,
-                emissiveIntensity: 0.2 + crackLevel * 0.6,
-                metalness: 0.82,
-                roughness: 0.28,
+                emissiveIntensity: 0.25 + crackLevel * 0.7,
+                metalness: 0.92,
+                roughness: 0.18,
                 transparent: true,
-                opacity: 0.95,
+                opacity: 0.88,
                 side: THREE.DoubleSide
             });
-
+            
             const petal = new THREE.Mesh(geometry, material);
-            const rad = 0.68;
-            const ang = (angleIndex / total) * Math.PI * 2;
+            const rad = radius;
+            const ang = angle;
             petal.position.x = Math.cos(ang) * rad;
             petal.position.z = Math.sin(ang) * rad;
-            petal.position.y = 0.18 + Math.sin(ang * 2) * 0.04;
-            petal.lookAt(0, 0.4, 0);
-            petal.rotateZ(ang * 0.5);
+            petal.position.y = yOffset + Math.sin(ang * 2) * 0.06;
+            petal.lookAt(0, yOffset + 0.35, 0);
+            petal.rotateZ(ang * 0.6);
             return petal;
         }
-
-        // 花朵
+        
+        // 创建完整花朵
         function createFlower(sadnessLevel) {
             const group = new THREE.Group();
-
-            const stamenMat = new THREE.MeshStandardMaterial({
+            
+            // 水晶花蕊 (核心发光)
+            const coreMat = new THREE.MeshStandardMaterial({
                 color: 0x88aaff,
-                emissive: 0x4488cc,
-                emissiveIntensity: 0.7,
-                metalness: 0.4
+                emissive: 0x4488ff,
+                emissiveIntensity: 0.9,
+                metalness: 0.7,
+                roughness: 0.2
             });
-            const stamen = new THREE.Mesh(new THREE.SphereGeometry(0.2,32,32), stamenMat);
-            group.add(stamen);
-
+            const core = new THREE.Mesh(new THREE.SphereGeometry(0.22, 48, 48), coreMat);
+            group.add(core);
+            
+            // 内层小晶体
+            const innerMat = new THREE.MeshStandardMaterial({
+                color: 0xaaccff,
+                emissive: 0x5588cc,
+                emissiveIntensity: 0.6,
+                metalness: 0.85
+            });
+            for (let i = 0; i < 12; i++) {
+                const spike = new THREE.Mesh(new THREE.ConeGeometry(0.06, 0.25, 8), innerMat);
+                const ang = (i / 12) * Math.PI * 2;
+                spike.position.set(Math.cos(ang) * 0.32, 0.1, Math.sin(ang) * 0.32);
+                spike.rotation.x = Math.PI / 3;
+                group.add(spike);
+            }
+            
+            // 外层花瓣 8片
             for (let i = 0; i < 8; i++) {
-                group.add(createPetal(i,8,sadnessLevel));
+                const ang = (i / 8) * Math.PI * 2;
+                group.add(createPetal(ang, 0.72, 0.22, sadnessLevel));
             }
+            // 中层花瓣 6片
             for (let i = 0; i < 6; i++) {
-                const p = createPetal(i+0.5,6,sadnessLevel);
-                p.scale.set(0.82,0.82,0.82);
-                p.position.x *= 0.75;
-                p.position.z *= 0.75;
-                p.position.y -= 0.03;
-                group.add(p);
+                const ang = (i / 6) * Math.PI * 2 + 0.35;
+                const petal = createPetal(ang, 0.58, 0.18, sadnessLevel);
+                petal.scale.set(0.88, 0.88, 0.88);
+                group.add(petal);
             }
-
+            // 外层大花瓣 8片 (交错)
+            for (let i = 0; i < 8; i++) {
+                const ang = (i / 8) * Math.PI * 2 + 0.45;
+                const petal = createPetal(ang, 0.85, 0.19, sadnessLevel);
+                petal.scale.set(0.95, 0.95, 0.95);
+                group.add(petal);
+            }
+            
             return group;
         }
-
-        // 泪滴粒子
-        function createParticles(sadnessLevel) {
-            const count = 350 + Math.floor(sadnessLevel * 550);
-            const geo = new THREE.BufferGeometry();
-            const pos = [];
+        
+        // 蓝色泪滴粒子系统
+        function createTearParticles(sadnessLevel) {
+            const count = 500 + Math.floor(sadnessLevel * 700);
+            const geometry = new THREE.BufferGeometry();
+            const positions = [];
+            const colors = [];
+            
             for (let i = 0; i < count; i++) {
-                const r = 0.9 + Math.random()*1.6;
-                const theta = Math.random()*Math.PI*2;
-                const phi = Math.acos(2*Math.random()-1);
-                pos.push(
-                    Math.sin(phi)*Math.cos(theta)*r,
-                    Math.sin(phi)*Math.sin(theta)*r + 0.4,
-                    Math.cos(phi)*r
+                const r = 1.0 + Math.random() * 2.0;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                positions.push(
+                    Math.sin(phi) * Math.cos(theta) * r,
+                    Math.sin(phi) * Math.sin(theta) * r + 0.4,
+                    Math.cos(phi) * r
                 );
+                const blueIntensity = 0.4 + Math.random() * 0.6 + sadnessLevel * 0.3;
+                colors.push(0.3, 0.4 + sadnessLevel * 0.3, blueIntensity);
             }
-            geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(pos),3));
-            const mat = new THREE.PointsMaterial({
-                color:0x66aaff,
-                size:0.032,
-                transparent:true,
-                blending:THREE.AdditiveBlending
+            geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3));
+            
+            const material = new THREE.PointsMaterial({
+                size: 0.028,
+                vertexColors: true,
+                transparent: true,
+                blending: THREE.AdditiveBlending,
+                opacity: 0.9
             });
-            return new THREE.Points(geo,mat);
+            return new THREE.Points(geometry, material);
         }
-
-        // 凋零
+        
+        // 凋零动画 (像素故障感)
         function witherAndRemove() {
             if (isWithering) return;
             if (!currentFlower && !currentParticles) return;
             isWithering = true;
-
-            const st = performance.now();
-            const dur = 1200;
-
-            function step(now) {
-                const p = Math.min(1,(now-st)/dur);
-
+            
+            const startTime = performance.now();
+            const duration = 1400;
+            
+            function witherStep(now) {
+                const progress = Math.min(1, (now - startTime) / duration);
+                const shakeX = Math.sin(progress * Math.PI * 12) * 0.06 * (1 - progress);
+                const shakeZ = Math.cos(progress * Math.PI * 10) * 0.06 * (1 - progress);
+                
                 if (currentFlower) {
-                    currentFlower.children.forEach(ch=>{
-                        if(ch.material){
-                            ch.material.opacity = Math.max(0,0.95*(1-p));
-                            ch.material.emissiveIntensity = Math.max(0,0.5*(1-p));
+                    currentFlower.position.x = shakeX;
+                    currentFlower.position.z = shakeZ;
+                    currentFlower.children.forEach(child => {
+                        if (child.material) {
+                            child.material.opacity = Math.max(0, 0.88 * (1 - progress * 1.1));
+                            child.material.emissiveIntensity = Math.max(0, 0.5 * (1 - progress));
                         }
                     });
-                    currentFlower.position.y = p*0.2;
+                    currentFlower.scale.setScalar(1 - progress * 0.3);
                 }
-                if(currentParticles){
-                    currentParticles.material.opacity = Math.max(0,1-p*1.2);
+                
+                if (currentParticles) {
+                    currentParticles.material.opacity = Math.max(0, 1 - progress * 1.3);
+                    currentParticles.material.size = 0.028 * (1 - progress);
                 }
-
-                if(p<1) requestAnimationFrame(step);
-                else{
-                    if(currentFlower) scene.remove(currentFlower);
-                    if(currentParticles) scene.remove(currentParticles);
+                
+                if (progress < 1) {
+                    requestAnimationFrame(witherStep);
+                } else {
+                    if (currentFlower) scene.remove(currentFlower);
+                    if (currentParticles) scene.remove(currentParticles);
                     currentFlower = null;
                     currentParticles = null;
                     isWithering = false;
+                    autoRotate = true;
                 }
             }
-            requestAnimationFrame(step);
+            
+            requestAnimationFrame(witherStep);
         }
-
-        // 绽放
+        
+        // 绽放新花
         function bloom(text) {
-            if(isWithering) return;
-            const sad = analyzeSadness(text);
-            currentSadness = sad;
-            document.getElementById('sadnessMeter').innerHTML = `💧 悲伤指数: ${Math.floor(sad*100)}%`;
-
-            if(currentFlower){
+            if (isWithering) return;
+            
+            const sadness = analyzeSadness(text);
+            currentSadness = sadness;
+            document.getElementById('sadnessMeter').innerHTML = `💔 悲伤指数: ${Math.floor(sadness * 100)}%`;
+            
+            if (currentFlower) {
                 witherAndRemove();
-                setTimeout(()=>{
-                    if(!isWithering && !currentFlower) createNew(sad);
-                },350);
-            }else{
-                createNew(sad);
+                setTimeout(() => {
+                    if (!isWithering && !currentFlower) {
+                        createAndAddFlower(sadness);
+                    }
+                }, 300);
+            } else {
+                createAndAddFlower(sadness);
             }
         }
-
-        function createNew(sad){
-            currentFlower = createFlower(sad);
-            currentParticles = createParticles(sad);
+        
+        function createAndAddFlower(sadness) {
+            currentFlower = createFlower(sadness);
+            currentParticles = createTearParticles(sadness);
             scene.add(currentFlower);
             scene.add(currentParticles);
-
-            currentFlower.scale.set(0,0,0);
-            let g=0;
-            function grow(){
-                g+=0.06;
-                const s=Math.min(1,g);
-                if(currentFlower) currentFlower.scale.set(s,s,s);
-                if(s<1) requestAnimationFrame(grow);
+            
+            // 生长动画
+            currentFlower.scale.set(0, 0, 0);
+            let growProgress = 0;
+            function growAnim() {
+                growProgress += 0.06;
+                const s = Math.min(1, growProgress);
+                if (currentFlower) currentFlower.scale.set(s, s, s);
+                if (s < 1) requestAnimationFrame(growAnim);
             }
-            requestAnimationFrame(grow);
+            requestAnimationFrame(growAnim);
             autoRotate = true;
         }
-
-        // 交互
-        document.getElementById('bloomBtn').onclick = ()=>{
-            const i = document.getElementById('sadInput');
-            bloom(i.value || "微光之哀");
-        };
-        document.getElementById('sadInput').onkeypress = e=>{
-            if(e.key==='Enter') bloom(e.target.value || "默然");
-        };
-
-        // 主循环
-        let time=0;
-        function anim(){
-            requestAnimationFrame(anim);
-            time+=0.016;
-
-            if(autoRotate && !isWithering){
-                angle+=0.008;
-                camera.position.x = 2.8*Math.sin(angle);
-                camera.position.z = 2.8*Math.cos(angle);
-                camera.lookAt(0,0.6,0);
+        
+        // 交互绑定
+        document.getElementById('bloomBtn').addEventListener('click', () => {
+            const input = document.getElementById('sadInput');
+            bloom(input.value || "无声的泪，破碎的心");
+        });
+        document.getElementById('sadInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') bloom(e.target.value || "寂静之殇");
+        });
+        
+        // 动画循环
+        let time = 0;
+        function animate() {
+            requestAnimationFrame(animate);
+            time += 0.016;
+            
+            // 自动旋转
+            if (autoRotate && !isWithering && currentFlower) {
+                autoRotateAngle += 0.005;
+                camera.position.x = 2.6 * Math.sin(autoRotateAngle);
+                camera.position.z = 2.6 * Math.cos(autoRotateAngle);
+                camera.lookAt(0, 0.65, 0);
             }
-
-            if(currentParticles && !isWithering){
-                currentParticles.rotation.y = time*0.15;
-                currentParticles.rotation.x = Math.sin(time*0.4)*0.1;
-                const pulse = 0.028 + currentSadness*0.02 + Math.sin(time*6)*0.003;
-                currentParticles.material.size = pulse;
+            
+            // 粒子动态
+            if (currentParticles && !isWithering) {
+                currentParticles.rotation.y = time * 0.18;
+                currentParticles.rotation.x = Math.sin(time * 0.45) * 0.12;
+                const pulseSize = 0.024 + currentSadness * 0.022 + Math.sin(time * 6) * 0.004;
+                currentParticles.material.size = pulseSize;
             }
-
-            fillLight.intensity = 0.4 + Math.sin(time)*0.15;
-            backLight.intensity = 0.3 + Math.cos(time*0.8)*0.1;
-
-            renderer.render(scene,camera);
+            
+            // 动态灯光
+            colorLight.intensity = 0.45 + Math.sin(time) * 0.2;
+            backLight.intensity = 0.7 + Math.sin(time * 0.8) * 0.2;
+            fillLight.intensity = 0.5 + Math.cos(time * 0.6) * 0.15;
+            
+            // 星星缓慢旋转
+            stars.rotation.y = time * 0.02;
+            
+            renderer.render(scene, camera);
         }
-        anim();
-
-        // 初始花
-        setTimeout(()=>bloom("寂静的思念如同破碎的水晶"),300);
-
-        // 响应窗口
-        window.onresize = ()=>{
-            camera.aspect = innerWidth/innerHeight;
+        
+        animate();
+        
+        // 初始花朵
+        setTimeout(() => bloom("破碎琉璃中的蓝色眼泪"), 400);
+        
+        // 窗口适配
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
-            renderer.setSize(innerWidth,innerHeight);
-        };
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
     </script>
 </body>
 </html>
